@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canda Executor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #111;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .window {
+      --ui-color: #2b2b2b;
+      background-color: var(--ui-color);
+      width: 950px;
+      height: 600px;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .title-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #1c1c1c;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .title-bar h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .window-controls {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+    }
+
+    .window-controls span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-left: 8px;
+      border-radius: 50%;
+    }
+
+    .window-controls .close { background-color: #ff5f56; }
+    .window-controls .min { background-color: #ffbd2e; }
+    .window-controls .max { background-color: #27c93f; }
+
+    .tab-buttons {
+      width: 120px;
+      background-color: #181818;
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      padding-top: 50px;
+    }
+
+    .tab-button {
+      padding: 15px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+      border-bottom: 1px solid #333;
+    }
+
+    .tab-button.active {
+      background-color: #007acc;
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 70px 20px 20px 20px;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .editor {
+      background-color: #1e1e1e;
+      height: 300px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      color: #ccc;
+      border: none;
+      resize: none;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+    }
+
+    .btn {
+      background-color: #007acc;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #005a94;
+    }
+
+    select.theme-selector {
+      background-color: #2b2b2b;
+      color: white;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    ul.script-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    li.script-item {
+      background-color: #333;
+      margin-bottom: 8px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    li.script-item:hover {
+      background-color: #444;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="window" id="main-ui">
+    <div class="title-bar">
+      <h1>Canda</h1>
+      <div class="window-controls">
+        <span class="close"></span>
+        <span class="min"></span>
+        <span class="max"></span>
+      </div>
+    </div>
+
+    <div class="tab-buttons">
+      <div class="tab-button active" data-tab="execution">Execution</div>
+      <div class="tab-button" data-tab="settings">Settings</div>
+      <div class="tab-button" data-tab="scripthub">ScriptHub</div>
+    </div>
+
+    <div class="content-area">
+      <div class="tab-content execution active">
+        <div class="editor">
+          <textarea placeholder="-- Paste your Lua script here..."></textarea>
+        </div>
+        <div class="footer">
+          <button class="btn" onclick="injectScript()">Inject</button>
+          <select class="theme-selector" onchange="changeTheme(this.value)">
+            <option value="black">Black</option>
+            <option value="gray">Gray</option>
+            <option value="terminal green">Terminal Green</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tab-content settings">
+        <h3>Settings</h3>
+        <label><input type="checkbox"> Auto Execute</label><br>
+        <label><input type="checkbox"> Inject Automatically</label><br>
+        <label><input type="checkbox"> Enable Debugging</label><br>
+      </div>
+
+      <div class="tab-content scripthub">
+        <h3>ScriptHub</h3>
+        <ul class="script-list">
+          <li class="script-item" onclick="loadScript('VXPE VOIDWARE')">VXPE VOIDWARE</li>
+          <li class="script-item" onclick="loadScript('RISE VOIDWARE')">RISE VOIDWARE</li>
+          <li class="script-item" onclick="loadScript('Vape rewrite')">Vape rewrite</li>
+          <li class="script-item" onclick="loadScript('Vape official')">Vape official</li>
+          <li class="script-item" onclick="loadScript('Aurora Script')">Aurora Script</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.querySelector(`.tab-content.${btn.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    function loadScript(scriptName) {
+      const scripts = {
+        "VXPE VOIDWARE": "loadstring(game:HttpGet('https://raw.githubusercontent.com/VapeVoidware/vapevoidware/main/NewMainScript.lua', true))()",
+        "RISE VOIDWARE": "loadstring(game:HttpGet('https://raw.githubusercontent.com/VapeVoidware/VWRise/refs/heads/main/NewMainScript.lua', true))()",
+        "Vape rewrite": "loadstring(game:HttpGet('https://raw.githubusercontent.com/VapeVoidware/VWRewrite/main/NewMainScript.lua', true))()",
+        "Vape official": "loadstring(game:HttpGet('https://raw.githubusercontent.com/QP-Offcial/VapeV4ForRoblox/main/NewMainScript.lua', true))()",
+        "Aurora Script": "loadstring(game:HttpGet('https://raw.githubusercontent.com/cocotv666/Aurora/refs/heads/main/Aurora_Loader'))()"
+      };
+      const editorTextarea = document.querySelector('.editor textarea');
+      editorTextarea.value = scripts[scriptName] || '';
+    }
+
+    function changeTheme(theme) {
+      const ui = document.getElementById('main-ui');
+      if (theme === 'black') {
+        ui.style.setProperty('--ui-color', '#2b2b2b');
+      } else if (theme === 'gray') {
+        ui.style.setProperty('--ui-color', '#3a3a3a');
+      } else if (theme === 'Terminal Green') {
+        ui.style.setProperty('--ui-color', '#008000');
+      }
+    }
+
+    function injectScript() {
+      const code = document.querySelector('.editor textarea').value.trim();
+      if (!code) {
+        alert('Please paste a script before injecting.');
+        return;
+      }
+      const blob = new Blob([code], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'script.lua';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
